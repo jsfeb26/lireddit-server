@@ -7,20 +7,22 @@ import { buildSchema } from "type-graphql";
 import microConfig from "./mikro-orm.config";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/Post";
+import { UserResolver } from "./resolvers/user";
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
   await orm.getMigrator().up;
 
   // I think you need to do this if you pass in a user in microConfig. Note that user must be SuperUser
-  // const generator = orm.getSchemaGenerator();
-  // await generator.updateSchema();
+  // UPDATE: Guess you do need this or else the new table won't get created
+  const generator = orm.getSchemaGenerator();
+  await generator.updateSchema();
 
   const app = express();
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolver],
+      resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
     context: () => ({ em: orm.em }),
