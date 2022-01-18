@@ -37,6 +37,11 @@ const main = async () => {
   app.use(
     cors({
       origin: (origin, callback) => {
+        // Allow graphql-code-gen to work locally
+        if (!__prod__ && origin === undefined) {
+          return callback(null, true);
+        }
+
         if (origin && whitelist.indexOf(origin) !== -1) {
           callback(null, true);
         } else {
