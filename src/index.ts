@@ -28,10 +28,21 @@ const main = async () => {
   const RedisStore = connectRedis(session);
   const redisClient = redis.createClient();
 
+  const whitelist = [
+    "http://localhost:3000",
+    "https://studio.apollographql.com",
+  ];
+
   // Apply cors middleware to all routes
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: (origin, callback) => {
+        if (origin && whitelist.indexOf(origin) !== -1) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
       credentials: true,
     })
   );
