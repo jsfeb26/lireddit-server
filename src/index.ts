@@ -4,25 +4,27 @@ import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
-import { MikroORM } from "@mikro-orm/core";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
+import { createConnection } from "typeorm";
 
-import microConfig from "./mikro-orm.config";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/Post";
 import { UserResolver } from "./resolvers/user";
 import { COOKIE_NAME, __prod__ } from "./constants";
+import { User } from "./entities/User";
+import { Post } from "./entities/Post";
 
 const main = async () => {
-  const orm = await MikroORM.init(microConfig);
-  // await orm.em.nativeDelete(User, {});
-  await orm.getMigrator().up;
-
-  // I think you need to do this if you pass in a user in microConfig. Note that user must be SuperUser
-  // UPDATE: Guess you do need this or else the new table won't get created
-  const generator = orm.getSchemaGenerator();
-  await generator.updateSchema();
+  await createConnection({
+    type: "postgres",
+    database: "lireddit2",
+    username: "postgres",
+    password: "postgres",
+    logging: true,
+    synchronize: true,
+    entities: [Post, User],
+  });
 
   const app = express();
 
@@ -77,7 +79,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ em: orm.em, req, res, redis }),
+    context: ({ req, res }) => ({ req, res, redis }),
   });
   await apolloServer.start();
   apolloServer.applyMiddleware({
