@@ -16,6 +16,7 @@ import { COOKIE_NAME, __prod__ } from "./constants";
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
+  // await orm.em.nativeDelete(User, {});
   await orm.getMigrator().up;
 
   // I think you need to do this if you pass in a user in microConfig. Note that user must be SuperUser
