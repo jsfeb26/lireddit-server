@@ -65,7 +65,7 @@ const main = async () => {
         sameSite: "lax", // protecting against CSRF
         secure: __prod__, // cookie only works in https
         // This is needed for Apollo Studio
-        // sameSite: 'none',
+        // sameSite: "none",
         // secure: true,
       },
       saveUninitialized: false,
